@@ -1,63 +1,87 @@
-import { useState } from "react";
-import "./App.css";
-import RepeatingFields from "./components/RepeatingFields";
-import axios from "axios";
-
+// App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import Login from './components/auth/Login'; // Import your Login component
+import FormPage from './pages/FormPage'; // Import the FormPage component
+import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
 function App() {
-  const [formFields, setFormFields] = useState([{ name: "", city: "" }]);
-  const submit = async (e) => {
-    e.preventDefault();
-  
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return console.error('User not logged in');
-    }
-  
-    try {
-      const response = await axios.post('http://localhost:5000/api/form', { formFields }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      console.log('Form submitted:', response.data);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-    }
-  };
- 
+  const token = localStorage.getItem('token');
   const logout = () => {
-    // Remove the token from localStorage
     localStorage.removeItem('token');
     console.log('User logged out, token removed');
   };
-  const fetchForms = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return console.error('User not logged in');
-    }
-  
-    try {
-      const response = await axios.get('http://localhost:5000/api/forms', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setForms(response.data); // Assuming you're storing the forms in state
-    } catch (error) {
-      console.error('Error fetching forms:', error);
-    }
-  };
-  
 
   return (
-    <div className="App">
-      <form className="form" onSubmit={submit}>
-        <RepeatingFields formFields={formFields} setFormFields={setFormFields} />
-      </form>
-      <br />
-      <button type="submit"  onClick={submit} className="btn">Submit</button>
-    </div>
+    <Router>
+      <div>
+        {/* Navigation Links */}
+        <nav>
+          <ul>
+            <li><Link to="/">Home</Link></li>
+           
+            {!token && <li><Link to="/login">Login</Link></li>}
+            {token && <li><Link to="/form">Form</Link></li>}
+            {token && <li><button onClick={logout}>Logout</button></li>}
+          </ul>
+        </nav>
+
+        {/* Define Routes */}
+        <Routes>
+          <Route path="/" element={<h1>Home Page</h1>} />
+          <Route path="/login" element={<Login />} />
+          {/* Protected Route for the Form */}
+          <Route path="/form" element={<ProtectedRoute component={FormPage} />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
+// function App() {
+
+//   const logout = () => {
+//     localStorage.removeItem('token');
+//     console.log('User logged out, token removed');
+//   };
+
+//   return (
+//     <>
+//     <Router>
+//       <div>
+//         {/* Navigation Links */}
+//         <nav>
+//           <ul>
+//             <li><Link to="/">Home</Link></li>
+//             <li><Link to="/login">Login</Link></li>
+//             <li><Link to="/form">Form</Link></li>
+//             <li><button onClick={logout}>Logout</button></li>
+//           </ul>
+//         </nav>
+
+//         {/* Define Routes */}
+//         <Routes>
+//           <Route path="/" exact>
+//             Home Page
+//           </Route>
+//           <Route path="/login" element={<Login />} />
+//           <Route 
+//         path="/form" 
+//         element={
+//           <ProtectedRoute>
+//             <FormPage />
+//           </ProtectedRoute>
+//         } 
+//       />
+//           {/* Protected Route for the Form */}
+//           {/* <ProtectedRoute path="/form" component={FormPage} /> */}
+//         </Routes>
+//       </div>
+//     </Router>
+
+
+    
+//     <h1>App Component</h1>
+//     </>
+//   );
+// }
 
 export default App;
