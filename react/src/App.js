@@ -9,6 +9,7 @@ function App() {
   const logout = () => {
     localStorage.removeItem('token');
     console.log('User logged out, token removed');
+    window.location.reload(); 
   };
 
   return (

@@ -19,7 +19,8 @@ const Login = () => {
       localStorage.setItem('token', token);
 
       // Redirect to form page after login
-      navigate('/form');
+    //   navigate('/form');
+      window.location.reload(); 
     } catch (error) {
       console.error('Login error:', error);
     }
