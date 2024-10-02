@@ -2,12 +2,18 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const Database = require("./db");
+// const authRoutes = require('./auth'); 
+const User = require('./model/userModel');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const RepeatingFields = require('./model/repeatingFields');
 const authMiddleware = require('./middleware/authMiddleware');
 require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+
+const JWT_SECRET = "your_jwt_secret_key"; 
 
 // // Middleware
 app.use(cors());
@@ -73,6 +79,34 @@ app.get('/api/forms', authMiddleware, async (req, res) => {
     // Find forms by the authenticated user's ID
     const userForms = await Form.find({ userId: req.user.userId });
     res.json(userForms);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const newUser = new User({ username, password });
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// User Login
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
