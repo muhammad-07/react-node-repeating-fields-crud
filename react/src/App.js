@@ -5,22 +5,49 @@ import axios from "axios";
 
 function App() {
   const [formFields, setFormFields] = useState([{ name: "", city: "" }]);
-
   const submit = async (e) => {
     e.preventDefault();
-    console.log(formFields);
-    
-
-    try {      
-      // const formattedFields = {name: formFields[0].name, city: formFields[0].city};
-      const response = await axios.post('http://localhost:5000/api/form', { formFields });
-  // console.log(formattedFields);
-      // const response = await axios.post('http://localhost:5000/api/form', formattedFields);
+  
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return console.error('User not logged in');
+    }
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/form', { formFields }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       console.log('Form submitted:', response.data);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
   };
+ 
+  const logout = () => {
+    // Remove the token from localStorage
+    localStorage.removeItem('token');
+    console.log('User logged out, token removed');
+  };
+  const fetchForms = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return console.error('User not logged in');
+    }
+  
+    try {
+      const response = await axios.get('http://localhost:5000/api/forms', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setForms(response.data); // Assuming you're storing the forms in state
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+    }
+  };
+  
 
   return (
     <div className="App">
