@@ -100,7 +100,42 @@ app.post('/api/forms', authMiddleware, async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+app.put('/api/form/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, city } = req.body;
+    
+    const updatedForm = await RepeatingFields.findOneAndUpdate(
+      { _id: id, userId: req.user.userId },
+      { name, city },
+      { new: true }
+    );
 
+    if (!updatedForm) {
+      return res.status(404).json({ error: "Form not found" });
+    }
+
+    res.json(updatedForm);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/form/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedForm = await RepeatingFields.findOneAndDelete({ _id: id, userId: req.user.userId });
+
+    if (!deletedForm) {
+      return res.status(404).json({ error: "Form not found" });
+    }
+
+    res.json({ message: 'Form deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 app.post('/api/auth/register', async (req, res) => {
   try {

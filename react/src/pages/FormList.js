@@ -1,7 +1,7 @@
 import React from 'react';
 // import axios from 'axios';
 
-const FormList = ({ forms, error }) => {
+const FormList = ({ forms, error, onEdit, onDelete  }) => {
 //   const [forms, setForms] = useState([]); // State to store forms
 //   const [error, setError] = useState(null); // State to store any errors
 
@@ -48,6 +48,8 @@ const FormList = ({ forms, error }) => {
             <li key={index}>
               <p><strong>Name:</strong> {form.name}</p>
               <p><strong>City:</strong> {form.city}</p>
+              <button onClick={() => onEdit(form)}>Edit</button> &nbsp;&nbsp;
+          <button onClick={() => onDelete(form._id)}>Delete</button>
             </li>
           ))}
         </ul>
