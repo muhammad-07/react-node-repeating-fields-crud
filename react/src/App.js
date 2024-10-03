@@ -1,8 +1,9 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
+import ForgotPassword from './components/auth/ForgotPassword'; // TODO: Add email fiel in SIGNUP for reset password
+import ResetPassword from './components/auth/ResetPassword';
 import FormPage from './pages/FormPage'; 
 import ProtectedRoute from './ProtectedRoute';
 function App() {
@@ -23,6 +24,7 @@ function App() {
            
             {!token && <li><Link to="/login">Login</Link></li>}
             {!token && <li><Link to="/signup">Signup</Link></li>}
+            {!token && <li><Link to="/forgot-password">Forgot Password?</Link></li>}
             {token && <li><Link to="/form">Form</Link></li>}
             {token && <li><button onClick={logout}>Logout</button></li>}
           </ul>
@@ -33,6 +35,8 @@ function App() {
           <Route path="/" element={<h1>Home Page</h1>} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
           {/* Protected Route for the Form */}
           <Route path="/form" element={<ProtectedRoute component={FormPage} />} />
         </Routes>

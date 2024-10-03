@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const Database = require("./db");
 // const authRoutes = require('./auth'); 
+const nodemailer = require('nodemailer');
 const User = require('./model/userModel');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -67,22 +68,39 @@ app.post('/api/form', authMiddleware, async (req, res) => {
     }));
 
     // Insert the forms into the database
-    const newForms = await Form.insertMany(formsWithUser);
+    const newForms = await RepeatingFields.insertMany(formsWithUser);
     res.status(201).json(newForms);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-app.get('/api/forms', authMiddleware, async (req, res) => {
+// app.get('/api/forms', authMiddleware, async (req, res) => {
+//   try {
+//     // Find forms by the authenticated user's ID
+//     const userForms = await RepeatingFields.find({ userId: req.user.userId });
+//     res.json(userForms);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// });
+app.post('/api/forms', authMiddleware, async (req, res) => {
   try {
-    // Find forms by the authenticated user's ID
-    const userForms = await Form.find({ userId: req.user.userId });
+    const { name, city } = req.body; // Accept search filters from the request body
+
+    // Build the search query dynamically based on provided filters
+    let searchQuery = { userId: req.user.userId };
+    if (name) searchQuery.name = name;
+    if (city) searchQuery.city = city;
+
+    // Find forms by the authenticated user's ID and any filters
+    const userForms = await RepeatingFields.find(searchQuery);
     res.json(userForms);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 app.post('/api/auth/register', async (req, res) => {
   try {
@@ -114,6 +132,73 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ token });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+
+const RESET_TOKEN_SECRET = "your_reset_token_secret_key"; // Secret for reset tokens
+
+// Nodemailer setup (for sending emails)
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.emailUser, // Replace with your email
+    pass: process.env.emailPassword  // Replace with your email password
+  }
+});
+
+// Forgot Password Request
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate reset token (expires in 1 hour)
+    const resetToken = jwt.sign({ userId: user._id }, RESET_TOKEN_SECRET, { expiresIn: '1h' });
+
+    // Create reset password link (e.g., http://localhost:3000/reset-password/token)
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+
+    // Send reset email
+    await transporter.sendMail({
+      from: process.env.emailUser,
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `Please click on the following link to reset your password: ${resetLink}`
+    });
+
+    res.status(200).json({ message: 'Password reset link sent to your email' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Reset Password
+app.post('/api/auth/reset-password/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Validate the token
+    const decoded = jwt.verify(token, RESET_TOKEN_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Invalid or expired token' });
+    }
+
+    // Hash and update the user's password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid or expired token' });
   }
 });
 
