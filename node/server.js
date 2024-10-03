@@ -5,6 +5,7 @@ const Database = require("./db");
 // const authRoutes = require('./auth'); 
 const nodemailer = require('nodemailer');
 const User = require('./model/userModel');
+const multer = require('multer'); // for file upload
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const RepeatingFields = require('./model/repeatingFields');
@@ -27,8 +28,19 @@ Database.connect(connectionString);
 module.exports = app;
 
 app.get("/", (req, res) => {
-    res.send("Hello Node");
+    res.send("Hello World");
  });
+
+ const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
 
 // For single entry
 //  app.post('/api/form', async (req, res) => {
@@ -137,17 +149,37 @@ app.delete('/api/form/:id', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/auth/register', async (req, res) => {
+// app.post('/api/auth/register', async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     const newUser = new User({ username, password });
+//     await newUser.save();
+//     res.status(201).json({ message: 'User registered successfully' });
+    
+//   } catch (error) 
+//   {
+//     if (error.code === 11000 && error.keyValue && error.keyValue.username) {
+//       return res.status(400).json({ error: 'This username is already taken' });
+//     }
+//     res.status(400).json({ error: error.message });
+//   }
+// });
+app.post('/api/auth/register', upload.single('profilePicture'), async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const newUser = new User({ username, password });
+    const { username, password, email } = req.body;
+    if (!email || !username || !password) {
+      return res.status(400).json({ error: 'Username, email, and password are required' });
+    }
+
+    const profilePicture = req.file ? `/uploads/${req.file.filename}` : null; // If file exists, save its path
+
+    const newUser = new User({ username, password, email, profilePicture });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
-    
-  } catch (error) 
-  {
-    if (error.code === 11000 && error.keyValue && error.keyValue.username) {
-      return res.status(400).json({ error: 'This username is already taken' });
+  } catch (error) {
+    if (error.code === 11000) {
+
+      return res.status(400).json({ error: 'Username or Email already taken' });
     }
     res.status(400).json({ error: error.message });
   }
@@ -236,6 +268,22 @@ app.post('/api/auth/reset-password/:token', async (req, res) => {
     res.status(400).json({ error: 'Invalid or expired token' });
   }
 });
+
+
+app.use("/uploads",express.static('uploads'));
+app.get('/api/user', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.userId; // Get the user ID from the token (set by your auth middleware)
+    const user = await User.findById(userId).select('username email profilePicture'); // Select only the fields you need
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user); // Send the user data as a response
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

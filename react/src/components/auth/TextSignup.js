@@ -25,21 +25,11 @@ const Signup = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('password', password);
-    if (profilePicture) {
-      formData.append('profilePicture', profilePicture);
-    }
-
     try {
-      
       // Send the registration request to the backend
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
+      const response = await axios.post('http://localhost:5000/api/auth/register', {
+        username,
+        password,
       });
 
       if (response.status === 201) {
@@ -48,7 +38,6 @@ const Signup = () => {
         navigate('/login');
       }
     } catch (error) {
-      // console.error('Signup error:', error.response?.data?.error || error.message);
       if (error.response && error.response.status === 400) {
         setError(error.response.data.error); // Display backend error
       } else {
@@ -70,13 +59,6 @@ const Signup = () => {
           placeholder="Username"
           required
         />
-         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-        />
         <input
           type="password"
           value={password}
@@ -90,11 +72,6 @@ const Signup = () => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
           required
-        />
-        <input
-          type="file"
-          onChange={(e) => setProfilePicture(e.target.files[0])}
-          accept="image/*"
         />
         <button type="submit">Signup</button>
       </form>
