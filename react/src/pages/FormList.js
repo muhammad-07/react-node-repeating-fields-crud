@@ -1,41 +1,10 @@
 import React from 'react';
-// import axios from 'axios';
+import { Card, Button, ListGroup, Container } from 'react-bootstrap';
 
-const FormList = ({ forms, error, onEdit, onDelete  }) => {
-//   const [forms, setForms] = useState([]); // State to store forms
-//   const [error, setError] = useState(null); // State to store any errors
-
-  // Function to fetch forms
-//   const fetchFilteredForms = async () => {
-//     const token = localStorage.getItem('token'); // Token from localStorage
-//     if (!token) {
-//       return console.error('User not logged in');
-//     }
-
-//     try {
-//       const response = await axios.post(
-//         'http://localhost:5000/api/forms',
-//         { name: '', city: '' }, // Empty filters, can be replaced with specific values
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}` // Authorization header with JWT
-//           }
-//         }
-//       );
-//       setForms(response.data); // Store the fetched forms in the state
-//     } catch (error) {
-//       console.error('Error fetching forms:', error);
-//       setError('Failed to fetch forms'); // Set an error message
-//     }
-//   };
-
-  // useEffect to fetch forms on component mount
-//   useEffect(() => {
-//     fetchFilteredForms();
-//   }, []);
+const FormList = ({ forms, error, onEdit, onDelete }) => {
 
   return (
-    <div>
+    <Container className="mt-5">
       <h2>Your Forms</h2>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -43,18 +12,36 @@ const FormList = ({ forms, error, onEdit, onDelete  }) => {
       {forms.length === 0 ? (
         <p>No forms available</p>
       ) : (
-        <ul>
+        <ListGroup>
           {forms.map((form, index) => (
-            <li key={index}>
-              <p><strong>Name:</strong> {form.name}</p>
-              <p><strong>City:</strong> {form.city}</p>
-              <button onClick={() => onEdit(form)}>Edit</button> &nbsp;&nbsp;
-          <button onClick={() => onDelete(form._id)}>Delete</button>
-            </li>
+            <ListGroup.Item key={index} className="mb-3">
+              <Card>
+                <Card.Body>
+                  <Card.Title>Form {index + 1}</Card.Title>
+                  <Card.Text>
+                    <strong>Name:</strong> {form.name} <br />
+                    <strong>City:</strong> {form.city}
+                  </Card.Text>
+                  <Button
+                    variant="primary"
+                    onClick={() => onEdit(form)}
+                    className="me-2"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => onDelete(form._id)}
+                  >
+                    Delete
+                  </Button>
+                </Card.Body>
+              </Card>
+            </ListGroup.Item>
           ))}
-        </ul>
+        </ListGroup>
       )}
-    </div>
+    </Container>
   );
 };
 
