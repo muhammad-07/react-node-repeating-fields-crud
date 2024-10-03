@@ -270,7 +270,7 @@ app.post('/api/auth/reset-password/:token', async (req, res) => {
 });
 
 
-app.use("/uploads",express.static('uploads'));
+app.use("/uploads",express.static('uploads')); // To allow static files from the 'uploads' folder
 app.get('/api/user', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId; // Get the user ID from the token (set by your auth middleware)
