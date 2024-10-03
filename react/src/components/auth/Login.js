@@ -12,14 +12,14 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/login', { username, password });
+      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
       const token = response.data.token;
 
       // Store the token in localStorage
       localStorage.setItem('token', token);
 
       // Redirect to form page after login
-    //   navigate('/form');
+      navigate('/form');
       window.location.reload(); 
     } catch (error) {
       console.error('Login error:', error);

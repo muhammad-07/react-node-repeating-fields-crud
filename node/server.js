@@ -84,20 +84,24 @@ app.get('/api/forms', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/register', async (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
     const newUser = new User({ username, password });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
     
-  } catch (error) {
+  } catch (error) 
+  {
+    if (error.code === 11000 && error.keyValue && error.keyValue.username) {
+      return res.status(400).json({ error: 'This username is already taken' });
+    }
     res.status(400).json({ error: error.message });
   }
 });
 
 // User Login
-app.post('/login', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });

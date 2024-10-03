@@ -1,9 +1,10 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Login from './components/auth/Login'; // Import your Login component
-import FormPage from './pages/FormPage'; // Import the FormPage component
-import ProtectedRoute from './ProtectedRoute'; // Import the ProtectedRoute component
+import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
+import FormPage from './pages/FormPage'; 
+import ProtectedRoute from './ProtectedRoute';
 function App() {
   const token = localStorage.getItem('token');
   const logout = () => {
@@ -21,6 +22,7 @@ function App() {
             <li><Link to="/">Home</Link></li>
            
             {!token && <li><Link to="/login">Login</Link></li>}
+            {!token && <li><Link to="/signup">Signup</Link></li>}
             {token && <li><Link to="/form">Form</Link></li>}
             {token && <li><button onClick={logout}>Logout</button></li>}
           </ul>
@@ -30,6 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<h1>Home Page</h1>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           {/* Protected Route for the Form */}
           <Route path="/form" element={<ProtectedRoute component={FormPage} />} />
         </Routes>
