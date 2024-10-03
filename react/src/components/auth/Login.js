@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -27,24 +28,40 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-        <button type="submit">Login</button>
-      </form>
-    </div>
+    
+    <Container className='mt-5'>
+      <Row className='justify-content-center'>
+        {/* {error && <p className='text-danger'>{error}</p>} */}
+        <Col md={6}>
+          <Form onSubmit={handleLogin}>
+            <h2>Login</h2>
+            <Form.Group className='mb-3'>
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                type='text'
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder='Username'
+              />
+            </Form.Group>
+            <Form.Group className='mb-3'>
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='Password'
+              />
+            </Form.Group>
+            <Button variant='primary' type='submit'>
+              Login
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+    </Container>
+      
+    
   );
 };
 
