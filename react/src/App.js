@@ -2,11 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
-import ForgotPassword from './components/auth/ForgotPassword'; // TODO: Add email fiel in SIGNUP for reset password
+import ForgotPassword from './components/auth/ForgotPassword';
 import ResetPassword from './components/auth/ResetPassword';
 import FormPage from './pages/FormPage'; 
 import UserProfile from './pages/UserProfile';
 import ProtectedRoute from './ProtectedRoute';
+import Home from './pages/Home';
+
+import "./assets/vendor/nucleo/css/nucleo.css";
+import "./assets/vendor/font-awesome/css/font-awesome.min.css";
+import "./assets/scss/argon-design-system-react.scss?v1.1.0";
+
 function App() {
   const token = localStorage.getItem('token');
   const logout = () => {
@@ -34,7 +40,7 @@ function App() {
 
         {/* Define Routes */}
         <Routes>
-          <Route path="/" element={<h1>Home Page</h1>} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
